@@ -83,7 +83,7 @@ Here is an example of a workflow file :
   "steps": [
     {
       "identifier": "login_to_platform",
-      "args": {"password": $PASSWORD, "username": "Joseph S"},
+      "args": {"password": "", "username": "Joseph S"},
       "flow_type": "chain"
     },
     {
@@ -92,7 +92,7 @@ Here is an example of a workflow file :
     },
     {
       "identifier": "save_in_mongodb",
-      "args": {"user": "mongo_user", "pw": $MONGOPASSWORD, "host": "localhost", "port": 27017},
+      "args": {"user": "mongo_user", "pw": "", "host": "localhost", "port": 27017},
       "flow_type": "group"
     }
 
@@ -101,17 +101,17 @@ Here is an example of a workflow file :
     "check_post": [
       {
         "args": {
-            "post_url": "https://instagram.com/p/publication1
+            "post_url": "https://instagram.com/p/publication1"
         }
       },
       {
         "args": {
-            "post_url": "https://instagram.com/p/publication2
+            "post_url": "https://instagram.com/p/publication2"
         }
       },
       {
         "args": {
-            "post_url": "https://instagram.com/p/publication3
+            "post_url": "https://instagram.com/p/publication3"
         }
       }
     ]
