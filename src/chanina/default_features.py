@@ -1,3 +1,7 @@
+""" 
+These are default features which have internal purposes and are built at the instanciation
+of the ChaninaApplication object.
+"""
 from chanina.utils import log
 from chanina.core.worker_session import WorkerSession
 

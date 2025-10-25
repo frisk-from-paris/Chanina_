@@ -12,6 +12,13 @@ class ChaninaTask(celery.Task):
 
 
 class Feature:
+    """
+        The Feature object is the interface that allows users to create a function with
+        access to the playwright context that can be treated as a celery Task.
+        The base_task argument is a the base class for the celery task, and the config argument
+        is a key/value object that is unwrapped in the task's decorator.
+        'args' is passed to the actual function of the feature.
+    """
     def __init__(
         self,
         app,
@@ -22,13 +29,6 @@ class Feature:
         bind: bool = False,
         base_task: Any = ChaninaTask
     ) -> None:
-        """
-        The Feature object is the interface that allows users to create a function with
-        access to the playwright context that can be treated as a celery Task.
-        The base_task argument is a the base class for the celery task, and the config argument
-        is a key/value object that is unwrapped in the task's decorator.
-        'args' is passed to the actual function of the feature.
-        """
         self.app = app
         self.func = func
         self.bind = bind
@@ -47,9 +47,6 @@ class Feature:
             **self.config
         )
         def _task(task = None, **kwargs):
-            print("type: ")
-            print(type(task))
-
             if task:
                 return self.func(task, self.app.worker_session, kwargs["args"])
             return self.func(self.app.worker_session, kwargs["args"])

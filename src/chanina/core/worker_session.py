@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from chanina.utils import log
 from chanina.tools import inspect, interact, navigate, filters, wait
@@ -52,7 +53,7 @@ class WorkerSession:
         return self._pw
 
     @property
-    def current_page(self) -> Page | None:
+    def current_page(self) -> Optional[Page]:
         """ Return the last created page. """
         return self._current_page
 

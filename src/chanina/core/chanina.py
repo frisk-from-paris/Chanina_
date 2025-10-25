@@ -1,3 +1,9 @@
+"""
+Operations that requires a specific state of the file system needs
+to be made at the time of the ChaninaApplication initialization.
+It's the only time when the program is ran, and we know for sure is not ran
+in a worker but on the host system.
+"""
 import os
 import uuid
 import shutil
@@ -5,18 +11,12 @@ from pathlib import Path
 from typing import Callable
 
 from chanina.utils import log
-from chanina.redis import redis
 from chanina.default_features import build_default_features
 from chanina.core.features import Feature
 from chanina.core.worker_session import WorkerSession
 
 from celery import Celery, signals
 
-
-# Operations that requires a specific state of the file system needs
-# to be made at the time of the ChaninaApplication initialization.
-# It's the only time when the program is ran, and we know for sure is not ran
-# in a worker but on the host system.
 
 def init_profile(profile_path: str):
     """
@@ -46,6 +46,7 @@ def init_profile(profile_path: str):
 
 
 def remove_profile(profile_path: str):
+    """ Remove the profile used for the session. """
     p = Path(profile_path).resolve()
     if not p.is_dir():
         raise ValueError(f"{p} is not a valid directory.")
@@ -57,6 +58,7 @@ def remove_profile(profile_path: str):
 
 
 class ChaninaApplication:
+    """ Chanina application object. """
     def __init__(
         self,
         caller_path: str,
@@ -109,6 +111,7 @@ class ChaninaApplication:
             log(f"[ChaninaApplication] WorkerSession initialized: {self._in_use_profile_path}")
 
     def _shutdown_worker(self, **_):
+        """ Deleted profiles and close session at shutdown. """
         if self._in_use_profile_path:
             remove_profile(self._in_use_profile_path)
         if self.worker_session:
