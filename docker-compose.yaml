@@ -1,0 +1,22 @@
+services:
+  redis:
+    hostname: "redis"
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  broker:
+    hostname: "broker"
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    ports:
+      - "5672:5672"   # port broker
+      - "15672:15672" # interface web management
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+volumes:
+  redis_data:
+  rabbitmq_data:

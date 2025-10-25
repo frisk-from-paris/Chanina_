@@ -1,0 +1,36 @@
+[project]
+name = "chanina"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Leo Hehlen",email = "leo.hehlen@pc-rtx.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "playwright (>=1.52.0,<2.0.0)",
+    "werkzeug (>=3.1.3,<4.0.0)",
+    "requests (>=2.32.3,<3.0.0)",
+    "pydantic (>=2.11.4,<3.0.0)",
+    "pydantic-settings (>=2.9.1,<3.0.0)",
+    "pytest (>=8.3.5,<9.0.0)",
+    "colorama (>=0.4.6,<0.5.0)",
+    "pyyaml (>=6.0.2,<7.0.0)",
+    "miniroute (>=0.2.5,<0.3.0)",
+    "celery (>=5.5.3,<6.0.0)",
+    "redis (>=6.4.0,<7.0.0)",
+    "uvicorn (>=0.38.0,<0.39.0)",
+]
+
+[tool.poetry]
+packages = [{include = "chanina", from = "src"}]
+
+[tool.poetry.scripts]
+tests = "tests.tests:run"
+workflow = "tests.workflow:run"
+cli = "src.chanina.core.runner:run"
+
+[tool.poetry.dependencies]
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
