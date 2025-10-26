@@ -1,0 +1,23 @@
+body {
+    font-size: 0.8em;
+}
+
+p {
+    padding-bottom: 0.7em;
+}
+
+li {
+    padding-top: 0px;
+}
+
+.caption-text {
+    font-size: 1.5em;
+}
+
+.toctree-wrapper {
+    margin-top: 30px;
+}
+
+ul {
+   padding-top: 0px;;
+}
