@@ -26,6 +26,7 @@ packages = [{include = "chanina", from = "src"}]
 tests = "tests.tests:run"
 workflow = "tests.workflow:run"
 cli = "src.chanina.core.runner:run"
+docs = "build_docs:run"
 
 [tool.poetry.dependencies]
 
