@@ -16,6 +16,7 @@ from chanina.core.features import Feature
 from chanina.core.worker_session import WorkerSession
 
 from celery import Celery, signals
+from redis import Redis
 
 
 def init_profile(profile_path: str):
@@ -75,7 +76,7 @@ class ChaninaApplication:
         self.worker_session = None
         self.features = {}
 
-        self.redis = redis
+        self.redis = Redis()
         self.redlock = f"lock:{caller_path}"
         self.celery = Celery("chanina", broker=broker, backend=backend)
 
@@ -105,6 +106,7 @@ class ChaninaApplication:
                 caller_path=self._caller_path,
                 headless=self._headless,
                 browser_name=self._browser_name,
+                app=self,
                 profile=profile
             )
 

@@ -8,21 +8,22 @@ from playwright.sync_api import Page, Playwright, sync_playwright
 
 
 class WorkerSession:
-    def __init__(
-        self,
-        caller_path: str,
-        headless: bool,
-        browser_name: str,
-        profile: str = ""
-    ) -> None:
-        """
+    """
         The 'WorkerSession' object is a shared IN MEMORY object between every tasks inside a
         same worker. This means that this object is not serialized, but lives in memory in the
         same space as every other tasks and processes inside the current worker.
 
         We start a playwright session here, which will live as long as this WorkerSession
         lives.
-        """
+    """
+    def __init__(
+        self,
+        caller_path: str,
+        headless: bool,
+        browser_name: str,
+        app,
+        profile: str = ""
+    ) -> None:
         # Starting playwright process ...
         log(f"[WorkerSession] Running playwright from dir : '{caller_path}'")
         self._pw = sync_playwright().start()
