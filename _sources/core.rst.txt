@@ -34,7 +34,7 @@ Runner
    :undoc-members:
 
 Worker Session
-~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
 
 .. automodule:: chanina.core.worker_session
    :members:
