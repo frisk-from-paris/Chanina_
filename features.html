@@ -103,16 +103,6 @@
 <hr class="docutils" />
 <section id="object-s-reference-s">
 <h3>Object(s) Reference(s)<a class="headerlink" href="#object-s-reference-s" title="Link to this heading"></a></h3>
-<dl class="py class">
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chanina.core.features.</span></span><span class="sig-name descname"><span class="pre">Feature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func:</span> <span class="pre">~typing.Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_id:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_task:</span> <span class="pre">~typing.Any</span> <span class="pre">=</span> <span class="pre">&lt;class</span> <span class="pre">'chanina.core.features.ChaninaTask'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/chanina/core/features.html#Feature"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>The Feature object is the interface that allows users to create a function with
-access to the playwright context that can be treated as a celery Task.
-The base_task argument is a the base class for the celery task, and the config argument
-is a key/value object that is unwrapped in the task’s decorator.
-‘args’ is passed to the actual function of the feature.</p>
-</dd></dl>
-
 </section>
 </section>
 </section>
