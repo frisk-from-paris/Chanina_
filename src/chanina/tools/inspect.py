@@ -1,4 +1,4 @@
-from chanina.utils import log
+import logging
 from chanina.tools._meta_tools import ensure_locators, wait_for_n_elements
 
 from playwright.sync_api import Locator
@@ -38,7 +38,7 @@ class Inspect:
             - n_min (int): minimum elements to wait for (raise exception if less)
         """
         if selector == "*":
-            log(f"selector is set to '*', this can slow the runtime a lot.", l=1)
+            logging.warning(f"selector is set to '*', this can slow the runtime a lot.")
         elements = wait_for_n_elements(page=self.session.current_page, n=n_min, selector=selector, timeout=timeout)
         if strict:
             return ensure_locators([el for el in elements if el.text_content() == text], self.session.current_page)

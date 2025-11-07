@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-from chanina.utils import log
+import logging
 from chanina.tools import inspect, interact, navigate, filters, wait
 
 from playwright.sync_api import Page, Playwright, sync_playwright
@@ -25,7 +25,7 @@ class WorkerSession:
         profile: str = ""
     ) -> None:
         # Starting playwright process ...
-        log(f"[WorkerSession] Running playwright from dir : '{caller_path}'")
+        logging.info(f"Running playwright from dir : '{caller_path}'")
         self._pw = sync_playwright().start()
 
         self._current_page = None
@@ -33,6 +33,8 @@ class WorkerSession:
         self._profile = profile
         self._headless = headless
         self._profile_path = os.path.abspath(profile)
+
+        self.app = app
 
         self._init_context()
 
@@ -46,7 +48,7 @@ class WorkerSession:
         # Initializes the tools.
         self._init_tools()
 
-        log("[WorkerSession] Initialized")
+        logging.info("Initialized")
 
     @property
     def playwright(self) -> Playwright:
@@ -65,16 +67,16 @@ class WorkerSession:
         """
         if self._browser_name == "firefox":
             if self._profile:
-                log(f"[WorkerSession] Launching firefox with persistent context. (profile: '{self._profile_path}')")
+                logging.info(f"Launching firefox with persistent context. (profile: '{self._profile_path}')")
                 self.browser_context = self._pw.firefox.launch_persistent_context(
                     user_data_dir=self._profile_path,
                     headless=self._headless
                 )
             else:
-                log("[WorkerSession] Launching firefox.")
+                logging.info("Launching firefox.")
                 self.browser_context = self._pw.firefox.launch(headless=self._headless).new_context()
         elif self._browser_name == "chrome":
-            log("[WorkerSession] Launching Chrome")
+            logging.info("Launching Chrome")
             self.browser_context = self._pw.chromium.launch(headless=self._headless).new_context()
         else:
             raise ValueError("Browser must be 'firefox' or 'chrome'")
@@ -114,6 +116,6 @@ class WorkerSession:
         try:
             self.browser_context.close()
         except Exception as e:
-            log(f"[WorkerSession] Closed with an exception : {e}")
+            logging.error(f"Closed with an exception : {e}")
         self._pw.stop()
-        log("[WorkerSession] Stopped.")
+        logging.warning("Stopped.")

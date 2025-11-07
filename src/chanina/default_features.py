@@ -2,7 +2,7 @@
 These are default features which have internal purposes and are built at the instanciation
 of the ChaninaApplication object.
 """
-from chanina.utils import log
+import logging
 from chanina.core.worker_session import WorkerSession
 
 
@@ -14,7 +14,7 @@ def chanina_new_page(session: WorkerSession, _):
     try:
         session.new_page()
     except Exception as e:
-        log(f"[ChaninaDefaultFeature] Failed to open a new page : {e}")
+        logging.error(f"[ChaninaDefaultFeature] Failed to open a new page : {e}")
 
 
 def chanina_close_page(session: WorkerSession, _):
@@ -24,14 +24,14 @@ def chanina_close_page(session: WorkerSession, _):
     try:
         session.close_page()
     except Exception as e:
-        log(f"[ChaninaDefaultFeature] Failed to close latest page: {e}")
+        logging.error(f"[ChaninaDefaultFeature] Failed to close latest page: {e}")
 
 
 def chanina_list_features(session: WorkerSession, _):
     """
     print a dictionnary of the features.
     """
-    log(f"[ChaninaDefaultFeature] chanina.list_features: {session.app.features}")
+    logging.info(f"[ChaninaDefaultFeature] chanina.list_features: {session.app.features}")
 
 
 def build_default_features(app):

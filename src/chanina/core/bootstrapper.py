@@ -1,4 +1,4 @@
-from chanina.utils import log
+import logging
 from chanina.core.chanina import Feature
 
 from celery import chain, group
@@ -21,10 +21,10 @@ class Sequencer:
     def sequence(self):
         return self._sequence
 
-    def add(self, step: dict, feature: Feature, instance: dict = {}):
+    def add(self, step: dict, feature: Feature, args: dict = {}):
         name = step["identifier"]
         flow_type = step["flow_type"]
-        args = instance.get("args", {})
+        args = args
 
         # flush if changing flow_type
         if self.previous_flow_type and flow_type != self.previous_flow_type:
@@ -36,7 +36,7 @@ class Sequencer:
                 self.group_tasks = []
 
         # add task to its list
-        task = feature.task.si(args=args)
+        task = feature.task.s(args=args)
 
         if flow_type == "chain":
             self.chain_tasks.append(task)
@@ -85,7 +85,7 @@ class Bootstrapper:
     @property
     def sequence(self):
         if not self.built:
-            log(f"[Bootstrapper] Trying to access sequence before the bootstrapper has been built.")
+            logging.error(f"Trying to access sequence before the bootstrapper has been built.")
             return []
         return self._sequencer.sequence
 
@@ -102,17 +102,19 @@ class Bootstrapper:
         for step in self.workflow["steps"]:
             feature = self.features.get(step["identifier"])
             if not feature:
-                log(f"[Bootstrapper] {step['identifier']} is not implemented.")
+                logging.error(f"{step['identifier']} is not implemented.")
                 continue
             # If the step needs multiple instances we build it here.
-            if step["identifier"] in self.workflow["instances"]:
-                for instance in self.workflow["instances"][step["identifier"]]:
-                    print(instance)
+            if step["identifier"] in self.workflow["instances"].keys():
+                initial_args = step.get("args", {}) or {}
+                for args in self.workflow["instances"][step["identifier"]]:
                     # 'instances' are dicts of args with which we re-run the task.
-                    self._sequencer.add(step, feature, instance)
+                    args.update(initial_args)
+                    self._sequencer.add(step, feature, args)
             # Otherwise we build the task here.
             else:
                 # 'step' is passed as 'args' cause it does contain the args at the key 'args'.
-                self._sequencer.add(step, feature, step)
+                all_args = step.get("args", {})
+                self._sequencer.add(step, feature, all_args)
         self._sequencer.flush()
         self._built = True
