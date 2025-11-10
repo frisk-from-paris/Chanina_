@@ -1,0 +1,250 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>chanina.core.worker_session &mdash; Chanina  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/style.css?v=4a8c160d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Chanina
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Get started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../application.html">Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features.html">Features</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tools.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../default-features.html">Default Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../core.html">Core</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../application-examples.html">Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features-examples.html">Features</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Chanina</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">chanina.core.worker_session</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for chanina.core.worker_session</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">chanina.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">inspect</span><span class="p">,</span> <span class="n">interact</span><span class="p">,</span> <span class="n">navigate</span><span class="p">,</span> <span class="n">filters</span><span class="p">,</span> <span class="n">wait</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">playwright.sync_api</span><span class="w"> </span><span class="kn">import</span> <span class="n">Page</span><span class="p">,</span> <span class="n">Playwright</span><span class="p">,</span> <span class="n">sync_playwright</span>
+
+
+<div class="viewcode-block" id="WorkerSession">
+<a class="viewcode-back" href="../../../features.html#chanina.core.worker_session.WorkerSession">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">WorkerSession</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The &#39;WorkerSession&#39; object is a shared IN MEMORY object between every tasks inside a</span>
+<span class="sd">        same worker. This means that this object is not serialized, but lives in memory in the</span>
+<span class="sd">        same space as every other tasks and processes inside the current worker.</span>
+
+<span class="sd">        We start a playwright session here, which will live as long as this WorkerSession</span>
+<span class="sd">        lives.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">caller_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">headless</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">browser_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">app</span><span class="p">,</span>
+        <span class="n">profile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Starting playwright process ...</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Running playwright from dir : &#39;</span><span class="si">{</span><span class="n">caller_path</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pw</span> <span class="o">=</span> <span class="n">sync_playwright</span><span class="p">()</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_page</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_browser_name</span> <span class="o">=</span> <span class="n">browser_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_profile</span> <span class="o">=</span> <span class="n">profile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_headless</span> <span class="o">=</span> <span class="n">headless</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_profile_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">profile</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">app</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_context</span><span class="p">()</span>
+
+        <span class="c1"># Those attributes will be populated by the _init_tools method.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">navigate</span><span class="p">:</span> <span class="n">navigate</span><span class="o">.</span><span class="n">Navigate</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="p">:</span> <span class="n">filters</span><span class="o">.</span><span class="n">Filters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inspect</span><span class="p">:</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Inspect</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interact</span><span class="p">:</span> <span class="n">interact</span><span class="o">.</span><span class="n">Interact</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">:</span> <span class="n">wait</span><span class="o">.</span><span class="n">Wait</span>
+
+        <span class="c1"># Initializes the tools.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_tools</span><span class="p">()</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Initialized&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">playwright</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Playwright</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return playwright context. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pw</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">current_page</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Page</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Return the last created page. &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_page</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_context</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to initialize the browser_context.</span>
+<span class="sd">        Depending on the profile and browser_name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_browser_name</span> <span class="o">==</span> <span class="s2">&quot;firefox&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_profile</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Launching firefox with persistent context. (profile: &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_profile_path</span><span class="si">}</span><span class="s2">&#39;)&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">browser_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pw</span><span class="o">.</span><span class="n">firefox</span><span class="o">.</span><span class="n">launch_persistent_context</span><span class="p">(</span>
+                    <span class="n">user_data_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_profile_path</span><span class="p">,</span>
+                    <span class="n">headless</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_headless</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Launching firefox.&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">browser_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pw</span><span class="o">.</span><span class="n">firefox</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="n">headless</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_headless</span><span class="p">)</span><span class="o">.</span><span class="n">new_context</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_browser_name</span> <span class="o">==</span> <span class="s2">&quot;chrome&quot;</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Launching Chrome&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browser_context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pw</span><span class="o">.</span><span class="n">chromium</span><span class="o">.</span><span class="n">launch</span><span class="p">(</span><span class="n">headless</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_headless</span><span class="p">)</span><span class="o">.</span><span class="n">new_context</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Browser must be &#39;firefox&#39; or &#39;chrome&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_tools</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        For ease of developpment, usage and maintaining, tools are objects that performs</span>
+<span class="sd">        cool operations inside the current_context, alway on the current page.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">navigate</span> <span class="o">=</span> <span class="n">navigate</span><span class="o">.</span><span class="n">Navigate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filters</span> <span class="o">=</span> <span class="n">filters</span><span class="o">.</span><span class="n">Filters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inspect</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Inspect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interact</span> <span class="o">=</span> <span class="n">interact</span><span class="o">.</span><span class="n">Interact</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span> <span class="o">=</span> <span class="n">wait</span><span class="o">.</span><span class="n">Wait</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WorkerSession.get_current_page">
+<a class="viewcode-back" href="../../../core.html#chanina.core.worker_session.WorkerSession.get_current_page">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_current_page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the current_page.</span>
+<span class="sd">        If required is True (default), raises an exception if current_page is None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">required</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_page</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Trying to access the current_page that doesn&#39;t exist.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_page</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_page</span> <span class="k">else</span> <span class="n">Page</span><span class="p">({})</span> <span class="c1"># Linter is pissing me off</span></div>
+
+
+<div class="viewcode-block" id="WorkerSession.new_page">
+<a class="viewcode-back" href="../../../core.html#chanina.core.worker_session.WorkerSession.new_page">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">new_page</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Page</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Create a new page, overrides the &#39;_current_page&#39;. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_page</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser_context</span><span class="o">.</span><span class="n">new_page</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_page</span></div>
+
+
+<div class="viewcode-block" id="WorkerSession.close_page">
+<a class="viewcode-back" href="../../../core.html#chanina.core.worker_session.WorkerSession.close_page">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">close_page</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Close the &#39;current_page&#39;.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_current_page</span><span class="p">()</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_page</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="WorkerSession.close">
+<a class="viewcode-back" href="../../../core.html#chanina.core.worker_session.WorkerSession.close">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Close the context. &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">browser_context</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Closed with an exception : </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pw</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Stopped.&quot;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Frisk.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
